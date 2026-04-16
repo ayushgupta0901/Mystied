@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>KYC Management</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg-base: #1a1a2e;
+  --bg-panel: #16213e;
+  --bg-card: #1e2a45;
+  --bg-card2: #232d47;
+  --bg-hover: #263352;
+  --bg-sidebar: #12192e;
+  --purple: #7c3aed;
+  --purple-light: #8b5cf6;
+  --purple-glow: rgba(124,58,237,0.18);
+  --green: #10b981;
+  --green-bg: rgba(16,185,129,0.15);
+  --orange: #f59e0b;
+  --orange-bg: rgba(245,158,11,0.15);
+  --red: #ef4444;
+  --red-bg: rgba(239,68,68,0.15);
+  --blue: #3b82f6;
+  --blue-bg: rgba(59,130,246,0.15);
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: rgba(255,255,255,0.07);
+  --border-active: rgba(124,58,237,0.4);
+  --radius: 10px;
+  --radius-lg: 14px;
+  --font: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary);min-height:100vh;display:flex;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{width:230px;background:var(--bg-sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;height:100vh}
+.sidebar-logo{padding:20px 18px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.logo-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff}
+.logo-text{font-size:14px;font-weight:600;color:var(--text-primary)}
+.logo-sub{font-size:10px;color:var(--text-muted);margin-top:1px}
+.sidebar-nav{padding:16px 12px;flex:1;display:flex;flex-direction:column;gap:4px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--radius);cursor:pointer;font-size:13px;font-weight:400;color:var(--text-secondary);transition:all 0.18s}
+.nav-item:hover{background:var(--bg-hover);color:var(--text-primary)}
+.nav-item.active{background:var(--purple);color:#fff;font-weight:500}
+.nav-item.active svg{opacity:1}
+.nav-item svg{width:17px;height:17px;opacity:0.7;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--purple-glow);color:var(--purple-light);font-size:10px;font-weight:600;padding:2px 7px;border-radius:99px}
+.nav-item.active .nav-badge{background:rgba(255,255,255,0.2);color:#fff}
+.sidebar-footer{padding:14px 12px;border-top:1px solid var(--border)}
+.mod-card{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--radius);background:var(--bg-card)}
+.mod-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0}
+.mod-name{font-size:12px;font-weight:500;color:var(--text-primary)}
+.mod-role{font-size:10px;color:var(--text-muted)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:0 24px;height:58px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--bg-panel);flex-shrink:0}
+.topbar-title{display:flex;align-items:center;gap:10px;flex:1}
+.topbar-icon{width:30px;height:30px;border-radius:8px;background:var(--purple-glow);border:1px solid var(--border-active);display:flex;align-items:center;justify-content:center}
+.topbar-icon svg{width:16px;height:16px;color:var(--purple-light)}
+.topbar h1{font-size:17px;font-weight:600;color:var(--text-primary)}
+.topbar-sub{font-size:12px;color:var(--text-muted);margin-top:1px}
+.search-wrap{display:flex;align-items:center;gap:8px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:7px 12px;width:260px}
+.search-wrap svg{width:14px;height:14px;color:var(--text-muted);flex-shrink:0}
+.search-wrap input{background:none;border:none;outline:none;font-size:13px;color:var(--text-primary);font-family:var(--font);width:100%}
+.search-wrap input::placeholder{color:var(--text-muted)}
+.icon-btn{width:34px;height:34px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-card);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);transition:all 0.15s;position:relative}
+.icon-btn:hover{border-color:var(--border-active);color:var(--text-primary)}
+.icon-btn .dot-notif{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--red);border:2px solid var(--bg-panel)}
+.content{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:22px}
+.content::-webkit-scrollbar{width:6px}
+.content::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* ── SHARED ── */
+.page-head{display:flex;align-items:center;gap:12px;margin-bottom:2px}
+.page-head h2{font-size:15px;font-weight:600;color:var(--text-primary);flex:1}
+.page-head .muted{font-size:12px;color:var(--text-muted)}
+.filter-bar{display:flex;align-items:center;gap:10px}
+.filters{display:flex;gap:6px}
+.filter-pill{padding:6px 13px;border-radius:99px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border);color:var(--text-secondary);background:transparent;transition:all 0.15s}
+.filter-pill:hover{border-color:rgba(255,255,255,0.15);color:var(--text-primary)}
+.filter-pill.active{background:var(--purple);border-color:var(--purple);color:#fff}
+
+/* stat cards */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;position:relative;overflow:hidden;transition:border-color 0.2s}
+.stat-card:hover{border-color:rgba(255,255,255,0.12)}
+.stat-card::before{content:'';position:absolute;top:0;right:0;width:90px;height:90px;border-radius:50%;opacity:0.08;transform:translate(24px,-24px)}
+.stat-card.purple::before{background:var(--purple)}
+.stat-card.blue::before{background:var(--blue)}
+.stat-card.red::before{background:var(--red)}
+.stat-card.green::before{background:var(--green)}
+.stat-label{font-size:11px;font-weight:500;color:var(--text-muted);margin-bottom:10px}
+.stat-val{font-size:26px;font-weight:600;color:var(--text-primary);line-height:1;margin-bottom:7px;font-family:var(--mono)}
+.stat-sub{font-size:11px;font-weight:500}
+.stat-sub.green{color:var(--green)}
+.stat-sub.orange{color:var(--orange)}
+.stat-sub.red{color:var(--red)}
+.stat-sub.muted{color:var(--text-muted)}
+.stat-icon{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.stat-icon.purple{background:var(--purple-glow);border:1px solid var(--border-active)}
+.stat-icon.blue{background:var(--blue-bg);border:1px solid rgba(59,130,246,0.3)}
+.stat-icon.red{background:var(--red-bg);border:1px solid rgba(239,68,68,0.3)}
+.stat-icon.green{background:var(--green-bg);border:1px solid rgba(16,185,129,0.3)}
+
+/* dashboard grid */
+.dash-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.panel{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.panel-head h3{font-size:13px;font-weight:600;color:var(--text-primary)}
+.panel-head .muted{font-size:11px;color:var(--text-muted)}
+.chart-wrap{width:100%;height:220px;display:block}
+.legend{display:flex;gap:14px;margin-top:10px;font-size:11px;color:var(--text-secondary)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:9px;height:9px;border-radius:2px;display:inline-block}
+
+/* donut */
+.donut-wrap{display:flex;align-items:center;justify-content:center;padding:10px 0}
+.donut-stats{margin-top:4px;display:flex;flex-direction:column;gap:9px}
+.donut-row{display:flex;align-items:center;gap:10px;font-size:12px}
+.donut-row i{width:9px;height:9px;border-radius:2px}
+.donut-row span:nth-child(2){flex:1;color:var(--text-secondary)}
+.donut-row span:last-child{color:var(--text-primary);font-weight:600;font-family:var(--mono)}
+
+/* activity */
+.activity{display:flex;flex-direction:column;gap:2px}
+.act-item{display:flex;align-items:center;gap:11px;padding:10px 8px;border-radius:8px;transition:background 0.15s}
+.act-item:hover{background:var(--bg-hover)}
+.act-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;flex-shrink:0}
+.act-text{flex:1;font-size:12px;color:var(--text-primary)}
+.act-text b{font-weight:500}
+.act-text em{font-style:normal;color:var(--text-muted)}
+.act-time{font-size:11px;color:var(--text-muted);font-family:var(--mono)}
+.act-status{padding:3px 9px;border-radius:99px;font-size:10px;font-weight:600}
+.act-status.app{background:var(--green-bg);color:var(--green)}
+.act-status.rej{background:var(--red-bg);color:var(--red)}
+.act-status.pen{background:var(--orange-bg);color:var(--orange)}
+
+/* table */
+.table-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.table{width:100%;border-collapse:collapse}
+.table thead tr{border-bottom:1px solid var(--border);background:var(--bg-card2)}
+.table th{padding:12px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.05em;text-transform:uppercase;white-space:nowrap}
+.table tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s}
+.table tbody tr:last-child{border-bottom:none}
+.table tbody tr:hover{background:var(--bg-hover)}
+.table td{padding:13px 16px;font-size:13px;color:var(--text-primary);vertical-align:middle}
+.table td:first-child{font-family:var(--mono);font-size:12px;color:var(--text-secondary)}
+.user-cell{display:flex;align-items:center;gap:10px}
+.user-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0}
+.user-name{font-size:13px;font-weight:500;color:var(--text-primary)}
+.user-handle{font-size:11px;color:var(--text-muted)}
+.date-cell{font-size:12px;color:var(--text-muted);font-family:var(--mono)}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600}
+.tag.green{background:var(--green-bg);color:var(--green);border:1px solid rgba(16,185,129,0.25)}
+.tag.red{background:var(--red-bg);color:var(--red);border:1px solid rgba(239,68,68,0.25)}
+.tag.orange{background:var(--orange-bg);color:var(--orange);border:1px solid rgba(245,158,11,0.25)}
+.tag.blue{background:var(--blue-bg);color:var(--blue);border:1px solid rgba(59,130,246,0.25)}
+.tag.muted{background:rgba(255,255,255,0.06);color:var(--text-secondary);border:1px solid var(--border)}
+.action-btns{display:flex;align-items:center;gap:6px}
+.btn-ghost{padding:5px 12px;border-radius:6px;background:transparent;border:1px solid var(--border);color:var(--text-secondary);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all 0.15s}
+.btn-ghost:hover{border-color:var(--border-active);color:var(--text-primary)}
+.btn-view{padding:5px 12px;border-radius:6px;background:var(--purple-glow);border:1px solid var(--border-active);color:var(--purple-light);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all 0.15s}
+.btn-view:hover{background:var(--purple);color:#fff}
+.btn-red{padding:5px 12px;border-radius:6px;background:var(--red-bg);border:1px solid rgba(239,68,68,0.3);color:var(--red);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all 0.15s}
+.btn-red:hover{background:var(--red);color:#fff}
+.btn-green{padding:5px 12px;border-radius:6px;background:var(--green-bg);border:1px solid rgba(16,185,129,0.3);color:var(--green);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all 0.15s}
+.btn-green:hover{background:var(--green);color:#fff}
+.table-footer{padding:13px 18px;border-top:1px solid var(--border);display:flex;align-items:center;font-size:12px;color:var(--text-muted);background:var(--bg-card2)}
+.pagination{display:flex;align-items:center;gap:4px;margin-left:auto}
+.pg-btn{width:30px;height:30px;border-radius:6px;background:transparent;border:1px solid var(--border);color:var(--text-secondary);font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;font-family:var(--font)}
+.pg-btn:hover{border-color:var(--border-active);color:var(--text-primary)}
+.pg-btn.active{background:var(--purple);border-color:var(--purple);color:#fff}
+.pg-nav{padding:0 10px;border-radius:6px;height:30px;background:transparent;border:1px solid var(--border);color:var(--text-secondary);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--font);transition:all 0.15s}
+.pg-nav:hover{border-color:var(--border-active);color:var(--text-primary)}
+
+/* settings */
+.settings-grid{display:grid;grid-template-columns:220px 1fr;gap:22px}
+.set-nav{display:flex;flex-direction:column;gap:4px;position:sticky;top:0}
+.set-nav-item{padding:10px 14px;border-radius:var(--radius);font-size:13px;color:var(--text-secondary);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:10px}
+.set-nav-item:hover{background:var(--bg-hover);color:var(--text-primary)}
+.set-nav-item.active{background:var(--purple-glow);color:var(--purple-light);font-weight:500;border:1px solid var(--border-active)}
+.set-nav-item svg{width:15px;height:15px;opacity:0.8}
+.set-section{display:flex;flex-direction:column;gap:16px}
+.set-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px}
+.set-card h3{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:4px}
+.set-card p.desc{font-size:12px;color:var(--text-muted);margin-bottom:16px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-row{display:flex;flex-direction:column;gap:6px}
+.form-row.full{grid-column:1/-1}
+.form-row label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted)}
+.form-row input, .form-row select, .form-row textarea{background:var(--bg-base);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text-primary);font-family:var(--font);outline:none;transition:border-color 0.15s}
+.form-row input:focus, .form-row select:focus, .form-row textarea:focus{border-color:var(--border-active)}
+.form-row textarea{resize:vertical;min-height:72px}
+
+/* profile uploader */
+.avatar-row{display:flex;align-items:center;gap:14px;padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.big-av{width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;flex-shrink:0}
+.avatar-info h4{font-size:14px;font-weight:600;color:var(--text-primary)}
+.avatar-info p{font-size:12px;color:var(--text-muted);margin-top:2px}
+.avatar-actions{margin-left:auto;display:flex;gap:8px}
+
+/* toggle rows */
+.toggle-row{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-row .t-info{flex:1}
+.toggle-row .t-info h4{font-size:13px;font-weight:500;color:var(--text-primary);margin-bottom:3px}
+.toggle-row .t-info p{font-size:12px;color:var(--text-muted)}
+.toggle{width:36px;height:20px;border-radius:99px;background:var(--bg-hover);border:1px solid var(--border);cursor:pointer;position:relative;transition:all 0.18s;flex-shrink:0}
+.toggle::after{content:'';position:absolute;top:1px;left:1px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform 0.18s}
+.toggle.on{background:var(--purple);border-color:var(--purple)}
+.toggle.on::after{transform:translateX(16px)}
+
+/* action button */
+.btn-primary{padding:9px 18px;border-radius:var(--radius);background:var(--purple);color:#fff;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:var(--font);transition:opacity 0.15s}
+.btn-primary:hover{opacity:0.9}
+.btn-secondary{padding:9px 18px;border-radius:var(--radius);background:var(--bg-hover);color:var(--text-primary);font-size:13px;font-weight:500;border:1px solid var(--border);cursor:pointer;font-family:var(--font);transition:all 0.15s}
+.btn-secondary:hover{border-color:var(--border-active)}
+.set-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
+
+/* modal (re-used) */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg-panel);border:1px solid var(--border);border-radius:18px;width:560px;max-height:90vh;overflow-y:auto;position:relative;transform:scale(0.96) translateY(10px);transition:transform 0.2s}
+.modal-overlay.open .modal{transform:scale(1) translateY(0)}
+.modal-header{padding:20px 24px;display:flex;align-items:flex-start;gap:12px;border-bottom:1px solid var(--border)}
+.modal-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;margin-left:auto}
+.modal-close:hover{background:var(--red-bg);color:var(--red)}
+.modal-body{padding:20px 24px}
+.modal-title h2{font-size:16px;font-weight:600;color:var(--text-primary)}
+.modal-title p{font-size:12px;color:var(--text-muted);margin-top:3px}
+.info-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.info-pair{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.info-pair .k{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin-bottom:4px}
+.info-pair .v{font-size:13px;color:var(--text-primary);font-weight:500}
+.reject-reason{margin-top:14px;padding:12px 14px;background:var(--red-bg);border:1px solid rgba(239,68,68,0.25);border-radius:var(--radius)}
+.reject-reason h4{font-size:11px;font-weight:600;text-transform:uppercase;color:var(--red);margin-bottom:6px;letter-spacing:0.05em}
+.reject-reason p{font-size:12px;color:var(--text-primary);line-height:1.5}
+
+/* toast */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:var(--radius);font-size:13px;font-weight:500;display:none;z-index:200}
+.toast.show{display:block;animation:slideUp 0.25s ease}
+.toast.approve{background:#064e3b;color:#6ee7b7;border:1px solid rgba(16,185,129,0.3)}
+.toast.reject{background:#450a0a;color:#fca5a5;border:1px solid rgba(239,68,68,0.3)}
+.toast.info{background:#1e293b;color:#cbd5e1;border:1px solid var(--border)}
+@keyframes slideUp{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+@media(max-width:1000px){.stats-grid{grid-template-columns:repeat(2,1fr)}.dash-grid{grid-template-columns:1fr}.settings-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">A</div>
+    <div>
+      <div class="logo-text">AdminPortal</div>
+      <div class="logo-sub">KYC Management</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active" data-page="dashboard" onclick="goTo('dashboard',this)">
+      <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.2" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="1" width="6" height="6" rx="1.2" stroke="currentColor" stroke-width="1.3"/><rect x="1" y="9" width="6" height="6" rx="1.2" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="9" width="6" height="6" rx="1.2" stroke="currentColor" stroke-width="1.3"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" data-page="approved" onclick="goTo('approved',this)">
+      <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 14c0-3 2.5-4.5 5.5-4.5s5.5 1.5 5.5 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M11 5.5l1 1 2-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Approved Users
+      <span class="nav-badge" id="badge-approved">0</span>
+    </div>
+    <div class="nav-item" data-page="rejected" onclick="goTo('rejected',this)">
+      <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 14c0-3 2.5-4.5 5.5-4.5s5.5 1.5 5.5 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M11 4.5l3 3M14 4.5l-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Rejected Users
+      <span class="nav-badge" id="badge-rejected">0</span>
+    </div>
+    <div class="nav-item" data-page="settings" onclick="goTo('settings',this)">
+      <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M13.5 9.8l1.3.7-1.3 2.2-1.4-.4a5.6 5.6 0 0 1-1.4.8L10.3 14.5H7.7l-.4-1.4a5.6 5.6 0 0 1-1.4-.8l-1.4.4-1.3-2.2 1.3-.7a5.6 5.6 0 0 1 0-1.6l-1.3-.7 1.3-2.2 1.4.4a5.6 5.6 0 0 1 1.4-.8L7.7 1.5h2.6l.4 1.4a5.6 5.6 0 0 1 1.4.8l1.4-.4 1.3 2.2-1.3.7a5.6 5.6 0 0 1 0 1.6z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      Settings
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="mod-card">
+      <div class="mod-avatar">MD</div>
+      <div>
+        <div class="mod-name">Moderator</div>
+        <div class="mod-role">Admin · Online</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-title">
+      <div class="topbar-icon" id="topIcon">
+        <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><rect x="1" y="1" width="6" height="6" rx="1.2" stroke="#8b5cf6" stroke-width="1.3"/><rect x="9" y="1" width="6" height="6" rx="1.2" stroke="#8b5cf6" stroke-width="1.3"/><rect x="1" y="9" width="6" height="6" rx="1.2" stroke="#8b5cf6" stroke-width="1.3"/><rect x="9" y="9" width="6" height="6" rx="1.2" stroke="#8b5cf6" stroke-width="1.3"/></svg>
+      </div>
+      <div>
+        <h1 id="pageTitle">Dashboard</h1>
+        <div class="topbar-sub" id="pageSub">Overview of KYC activity</div>
+      </div>
+    </div>
+    <div class="search-wrap" id="searchWrap">
+      <svg viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.3"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      <input type="text" placeholder="Search…" id="searchInput" oninput="filterTables()"/>
+    </div>
+    <button class="icon-btn" title="Notifications"><svg viewBox="0 0 16 16" fill="none" width="15" height="15"><path d="M12 11a4 4 0 0 0-4-4 4 4 0 0 0-4 4v1h8v-1z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 2v1M3 5l.5.5M13 5l-.5.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M6.5 13a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.3"/></svg><span class="dot-notif"></span></button>
+  </header>
+
+  <div class="content" id="content">
+    <!-- Dashboard -->
+    <section id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card purple">
+          <div class="stat-icon purple">
+            <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M2 8h3l2-5 3 10 2-5h3" stroke="#8b5cf6" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="stat-label">Total Submissions</div>
+          <div class="stat-val">445</div>
+          <div class="stat-sub green">↑ 12.4% this month</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon green">
+            <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M3 8l3 3 7-7" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="stat-label">Approved</div>
+          <div class="stat-val" id="st-approved">214</div>
+          <div class="stat-sub green">98.2% success</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-icon red">
+            <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M4 4l8 8M12 4l-8 8" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div class="stat-label">Rejected</div>
+          <div class="stat-val" id="st-rejected">89</div>
+          <div class="stat-sub red">↓ 3.1% this month</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon blue">
+            <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><circle cx="8" cy="8" r="5.5" stroke="#3b82f6" stroke-width="1.3"/><path d="M8 5v3l2 2" stroke="#3b82f6" stroke-width="1.3" stroke-linecap="round"/></svg>
+          </div>
+          <div class="stat-label">Pending Review</div>
+          <div class="stat-val">142</div>
+          <div class="stat-sub orange">34 high priority</div>
+        </div>
+      </div>
+
+      <div class="dash-grid" style="margin-top:22px">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Submissions over time</h3>
+            <div class="muted">Last 7 days</div>
+          </div>
+          <svg class="chart-wrap" viewBox="0 0 600 220" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="gradApp" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#10b981" stop-opacity="0.4"/>
+                <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="gradRej" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#ef4444" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- gridlines -->
+            <line x1="40" y1="30" x2="590" y2="30" stroke="rgba(255,255,255,0.04)"/>
+            <line x1="40" y1="80" x2="590" y2="80" stroke="rgba(255,255,255,0.04)"/>
+            <line x1="40" y1="130" x2="590" y2="130" stroke="rgba(255,255,255,0.04)"/>
+            <line x1="40" y1="180" x2="590" y2="180" stroke="rgba(255,255,255,0.04)"/>
+            <text x="30" y="34" fill="#64748b" font-size="10" text-anchor="end">80</text>
+            <text x="30" y="84" fill="#64748b" font-size="10" text-anchor="end">60</text>
+            <text x="30" y="134" fill="#64748b" font-size="10" text-anchor="end">40</text>
+            <text x="30" y="184" fill="#64748b" font-size="10" text-anchor="end">20</text>
+            <!-- approved area -->
+            <path d="M50 140 L130 90 L210 110 L290 60 L370 75 L450 55 L530 45 L530 200 L50 200 Z" fill="url(#gradApp)"/>
+            <path d="M50 140 L130 90 L210 110 L290 60 L370 75 L450 55 L530 45" stroke="#10b981" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- rejected area -->
+            <path d="M50 180 L130 175 L210 160 L290 170 L370 155 L450 165 L530 150 L530 200 L50 200 Z" fill="url(#gradRej)"/>
+            <path d="M50 180 L130 175 L210 160 L290 170 L370 155 L450 165 L530 150" stroke="#ef4444" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 3"/>
+            <!-- points -->
+            <g fill="#10b981"><circle cx="50" cy="140" r="3"/><circle cx="130" cy="90" r="3"/><circle cx="210" cy="110" r="3"/><circle cx="290" cy="60" r="3"/><circle cx="370" cy="75" r="3"/><circle cx="450" cy="55" r="3"/><circle cx="530" cy="45" r="3"/></g>
+            <!-- x labels -->
+            <g fill="#64748b" font-size="10" text-anchor="middle">
+              <text x="50" y="215">Mon</text><text x="130" y="215">Tue</text><text x="210" y="215">Wed</text><text x="290" y="215">Thu</text><text x="370" y="215">Fri</text><text x="450" y="215">Sat</text><text x="530" y="215">Sun</text>
+            </g>
+          </svg>
+          <div class="legend"><span><i style="background:#10b981"></i>Approved</span><span><i style="background:#ef4444"></i>Rejected</span></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Status breakdown</h3>
+          </div>
+          <div class="donut-wrap">
+            <svg width="180" height="180" viewBox="0 0 42 42">
+              <circle cx="21" cy="21" r="15.9" fill="transparent" stroke="#1e2a45" stroke-width="4"/>
+              <circle cx="21" cy="21" r="15.9" fill="transparent" stroke="#10b981" stroke-width="4" stroke-dasharray="48 100" stroke-dashoffset="25" stroke-linecap="butt"/>
+              <circle cx="21" cy="21" r="15.9" fill="transparent" stroke="#ef4444" stroke-width="4" stroke-dasharray="20 100" stroke-dashoffset="-23" stroke-linecap="butt"/>
+              <circle cx="21" cy="21" r="15.9" fill="transparent" stroke="#f59e0b" stroke-width="4" stroke-dasharray="32 100" stroke-dashoffset="-43" stroke-linecap="butt"/>
+              <text x="21" y="20" text-anchor="middle" font-size="5" fill="#e2e8f0" font-weight="600">445</text>
+              <text x="21" y="25" text-anchor="middle" font-size="2.5" fill="#64748b">total</text>
+            </svg>
+          </div>
+          <div class="donut-stats">
+            <div class="donut-row"><i style="background:#10b981"></i><span>Approved</span><span>214</span></div>
+            <div class="donut-row"><i style="background:#ef4444"></i><span>Rejected</span><span>89</span></div>
+            <div class="donut-row"><i style="background:#f59e0b"></i><span>Pending</span><span>142</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:18px">
+        <div class="panel-head">
+          <h3>Recent activity</h3>
+          <div class="muted">Last 24 hours</div>
+        </div>
+        <div class="activity" id="activityList"></div>
+      </div>
+    </section>
+
+    <!-- Approved -->
+    <section id="page-approved" style="display:none">
+      <div class="stats-grid">
+        <div class="stat-card green"><div class="stat-icon green"><svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M3 8l3 3 7-7" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="stat-label">Total Approved</div><div class="stat-val" id="st-app-total">0</div><div class="stat-sub green">All-time verified users</div>
+        </div>
+        <div class="stat-card purple"><div class="stat-icon purple"><svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M2 12l3-4 3 2 3-5 3 3" stroke="#8b5cf6" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="stat-label">This Month</div><div class="stat-val">47</div><div class="stat-sub green">↑ 18% vs last month</div>
+        </div>
+        <div class="stat-card blue"><div class="stat-icon blue"><svg viewBox="0 0 16 16" fill="none" width="16" height="16"><circle cx="8" cy="8" r="5.5" stroke="#3b82f6" stroke-width="1.3"/><path d="M5 8l2 2 4-4" stroke="#3b82f6" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="stat-label">Avg. Review Time</div><div class="stat-val">4.2h</div><div class="stat-sub muted">Per submission</div>
+        </div>
+        <div class="stat-card green"><div class="stat-icon green"><svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M8 1.5l5 2.5v4c0 3-2 5-5 6.5-3-1.5-5-3.5-5-6.5v-4l5-2.5z" stroke="#10b981" stroke-width="1.3" stroke-linejoin="round"/></svg></div>
+          <div class="stat-label">Trust Score Avg.</div><div class="stat-val">92<span style="font-size:16px;color:var(--text-muted)">/100</span></div><div class="stat-sub green">High integrity</div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px">
+        <div class="page-head" style="margin-bottom:12px">
+          <h2>Approved Users</h2>
+          <div class="filter-bar">
+            <div class="filters">
+              <div class="filter-pill active" onclick="setApprovedFilter('all',this)">All</div>
+              <div class="filter-pill" onclick="setApprovedFilter('week',this)">This week</div>
+              <div class="filter-pill" onclick="setApprovedFilter('month',this)">This month</div>
+              <div class="filter-pill" onclick="setApprovedFilter('low',this)">Low risk</div>
+            </div>
+            <button class="btn-ghost" onclick="exportCSV('approved')">
+              <svg viewBox="0 0 14 14" fill="none" width="12" height="12" style="vertical-align:-2px;margin-right:5px"><path d="M7 2v7M4 6l3 3 3-3M2 12h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Export CSV
+            </button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr>
+              <th>ID</th><th>User</th><th>Email</th><th>Document</th><th>Approved On</th><th>Risk</th><th>Trust</th><th>Action</th>
+            </tr></thead>
+            <tbody id="approvedBody"></tbody>
+          </table>
+          <div class="table-footer">
+            <span id="approved-count">0 users</span>
+            <div class="pagination">
+              <button class="pg-nav">← Prev</button>
+              <button class="pg-btn active">1</button>
+              <button class="pg-btn">2</button>
+              <button class="pg-btn">3</button>
+              <button class="pg-nav">Next →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Rejected -->
+    <section id="page-rejected" style="display:none">
+      <div class="stats-grid">
+        <div class="stat-card red"><div class="stat-icon red"><svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M4 4l8 8M12 4l-8 8" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+          <div class="stat-label">Total Rejected</div><div class="stat-val" id="st-rej-total">0</div><div class="stat-sub red">Failed verification</div>
+        </div>
+        <div class="stat-card orange"><div class="stat-icon orange" style="background:var(--orange-bg);border:1px solid rgba(245,158,11,0.3)"><svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M8 5v4M8 11v1" stroke="#f59e0b" stroke-width="1.4" stroke-linecap="round"/><path d="M2 13L8 3l6 10H2z" stroke="#f59e0b" stroke-width="1.3" stroke-linejoin="round"/></svg></div>
+          <div class="stat-label">Top Reason</div><div class="stat-val" style="font-size:18px;font-family:var(--font)">Blurred ID</div><div class="stat-sub orange">38% of rejections</div>
+        </div>
+        <div class="stat-card blue"><div class="stat-icon blue"><svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M3 8a5 5 0 1 0 5-5" stroke="#3b82f6" stroke-width="1.3" stroke-linecap="round"/><path d="M8 3V1m-5 2h2" stroke="#3b82f6" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+          <div class="stat-label">Resubmitted</div><div class="stat-val">34</div><div class="stat-sub muted">38% bounce-back rate</div>
+        </div>
+        <div class="stat-card red"><div class="stat-icon red"><svg viewBox="0 0 16 16" fill="none" width="16" height="16"><circle cx="8" cy="8" r="6" stroke="#ef4444" stroke-width="1.3"/><path d="M8 5v3" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="10.5" r="0.7" fill="#ef4444"/></svg></div>
+          <div class="stat-label">Flagged Fraud</div><div class="stat-val">12</div><div class="stat-sub red">Permanently blocked</div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px">
+        <div class="page-head" style="margin-bottom:12px">
+          <h2>Rejected Users</h2>
+          <div class="filter-bar">
+            <div class="filters">
+              <div class="filter-pill active" onclick="setRejectedFilter('all',this)">All</div>
+              <div class="filter-pill" onclick="setRejectedFilter('blurred',this)">Blurred ID</div>
+              <div class="filter-pill" onclick="setRejectedFilter('mismatch',this)">Face mismatch</div>
+              <div class="filter-pill" onclick="setRejectedFilter('fraud',this)">Fraud</div>
+              <div class="filter-pill" onclick="setRejectedFilter('expired',this)">Expired</div>
+            </div>
+            <button class="btn-ghost" onclick="exportCSV('rejected')">
+              <svg viewBox="0 0 14 14" fill="none" width="12" height="12" style="vertical-align:-2px;margin-right:5px"><path d="M7 2v7M4 6l3 3 3-3M2 12h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Export CSV
+            </button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr>
+              <th>ID</th><th>User</th><th>Email</th><th>Rejected On</th><th>Reason</th><th>Attempts</th><th>Action</th>
+            </tr></thead>
+            <tbody id="rejectedBody"></tbody>
+          </table>
+          <div class="table-footer">
+            <span id="rejected-count">0 users</span>
+            <div class="pagination">
+              <button class="pg-nav">← Prev</button>
+              <button class="pg-btn active">1</button>
+              <button class="pg-btn">2</button>
+              <button class="pg-nav">Next →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="page-settings" style="display:none">
+      <div class="settings-grid">
+        <div class="set-nav">
+          <div class="set-nav-item active" onclick="switchSetTab('profile',this)">
+            <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 14c0-3 2.5-4.5 5.5-4.5s5.5 1.5 5.5 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Profile
+          </div>
+          <div class="set-nav-item" onclick="switchSetTab('security',this)">
+            <svg viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M5 7V5a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Security
+          </div>
+          <div class="set-nav-item" onclick="switchSetTab('kyc',this)">
+            <svg viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="10" height="13" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 5h6M4 8h6M4 11h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            KYC Rules
+          </div>
+          <div class="set-nav-item" onclick="switchSetTab('notif',this)">
+            <svg viewBox="0 0 16 16" fill="none"><path d="M12 11a4 4 0 0 0-4-4 4 4 0 0 0-4 4v1h8v-1z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 2v1M6.5 13a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Notifications
+          </div>
+          <div class="set-nav-item" onclick="switchSetTab('team',this)">
+            <svg viewBox="0 0 16 16" fill="none"><circle cx="6" cy="6" r="3" stroke="currentColor" stroke-width="1.3"/><circle cx="11" cy="6" r="3" stroke="currentColor" stroke-width="1.3"/><path d="M1 14s.5-3 5-3M10 11c4.5 0 5 3 5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Team
+          </div>
+        </div>
+
+        <div class="set-section" id="set-content">
+          <!-- PROFILE -->
+          <div class="set-tab" id="set-profile">
+            <div class="set-card">
+              <h3>Admin profile</h3>
+              <p class="desc">Update your personal info and profile photo</p>
+              <div class="avatar-row">
+                <div class="big-av">MD</div>
+                <div class="avatar-info">
+                  <h4>Moderator Das</h4>
+                  <p>admin@mystied.app · Admin</p>
+                </div>
+                <div class="avatar-actions">
+                  <button class="btn-secondary">Upload new</button>
+                  <button class="btn-ghost">Remove</button>
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="form-row"><label>First name</label><input type="text" value="Moderator"/></div>
+                <div class="form-row"><label>Last name</label><input type="text" value="Das"/></div>
+                <div class="form-row"><label>Email</label><input type="email" value="admin@mystied.app"/></div>
+                <div class="form-row"><label>Phone</label><input type="tel" value="+91 98765 43210"/></div>
+                <div class="form-row"><label>Timezone</label>
+                  <select><option>Asia/Kolkata (IST)</option><option>UTC</option><option>America/New_York</option><option>Europe/London</option></select>
+                </div>
+                <div class="form-row"><label>Language</label>
+                  <select><option>English</option><option>हिन्दी</option><option>Español</option></select>
+                </div>
+                <div class="form-row full"><label>Bio</label><textarea>KYC reviewer since 2024. Focused on document integrity and fraud prevention.</textarea></div>
+              </div>
+              <div class="set-actions"><button class="btn-ghost">Cancel</button><button class="btn-primary" onclick="saveSettings()">Save changes</button></div>
+            </div>
+          </div>
+
+          <!-- SECURITY -->
+          <div class="set-tab" id="set-security" style="display:none">
+            <div class="set-card">
+              <h3>Password</h3>
+              <p class="desc">Must be at least 10 characters, with letters and numbers</p>
+              <div class="form-grid">
+                <div class="form-row full"><label>Current password</label><input type="password" placeholder="••••••••"/></div>
+                <div class="form-row"><label>New password</label><input type="password" placeholder="New password"/></div>
+                <div class="form-row"><label>Confirm new password</label><input type="password" placeholder="Repeat password"/></div>
+              </div>
+              <div class="set-actions"><button class="btn-primary" onclick="saveSettings()">Update password</button></div>
+            </div>
+            <div class="set-card">
+              <h3>Two-factor authentication</h3>
+              <p class="desc">Add an extra layer of security to your account</p>
+              <div class="toggle-row">
+                <div class="t-info"><h4>Authenticator app</h4><p>Use Google Authenticator or similar</p></div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="t-info"><h4>SMS verification</h4><p>Receive a code on your phone</p></div>
+                <div class="toggle" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="t-info"><h4>Backup codes</h4><p>Generate codes for emergency access</p></div>
+                <button class="btn-ghost">Generate</button>
+              </div>
+            </div>
+            <div class="set-card">
+              <h3>Active sessions</h3>
+              <p class="desc">Devices currently signed in to your account</p>
+              <div class="toggle-row">
+                <div class="t-info"><h4>MacBook Pro · Chrome</h4><p>Mumbai, India · Current session</p></div>
+                <span class="tag green">Active</span>
+              </div>
+              <div class="toggle-row">
+                <div class="t-info"><h4>iPhone 15 · Safari</h4><p>Mumbai, India · 2 hours ago</p></div>
+                <button class="btn-red">Revoke</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- KYC RULES -->
+          <div class="set-tab" id="set-kyc" style="display:none">
+            <div class="set-card">
+              <h3>Verification requirements</h3>
+              <p class="desc">Configure what's required for a user to complete KYC</p>
+              <div class="toggle-row">
+                <div class="t-info"><h4>Government ID required</h4><p>Aadhaar, PAN, Passport, or Driving Licence</p></div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="t-info"><h4>Selfie + liveness check</h4><p>Match face to document photo</p></div>
+                <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="t-info"><h4>Address proof</h4><p>Bank statement, utility bill, or rental agreement</p></div>
+                <div class="toggle" onclick="this.classList.toggle('on')"></div>
+              </div>
+              <div class="toggle-row">
+                <div class="t-info"><h4>Auto-approve low risk</h4><p>Automatically approve submissions scoring above threshold</p></div>
+                <div class="toggle" onclick="this.classList.toggle('on')"></div>
+              </div>
+            </div>
+            <div class="set-card">
+              <h3>Thresholds</h3>
+              <p class="desc">Scoring thresholds used by the verification engine</p>
+              <div class="form-grid">
+                <div class="form-row"><label>Face match minimum</label><input type="number" value="75"/></div>
+                <div class="form-row"><label>Liveness confidence min</label><input type="number" value="85"/></div>
+                <div class="form-row"><label>OCR confidence min</label><input type="number" value="80"/></div>
+                <div class="form-row"><label>Auto-reject age below</label><input type="number" value="18"/></div>
+              </div>
+              <div class="set-actions"><button class="btn-primary" onclick="saveSettings()">Save thresholds</button></div>
+            </div>
+          </div>
+
+          <!-- NOTIFICATIONS -->
+          <div class="set-tab" id="set-notif" style="display:none">
+            <div class="set-card">
+              <h3>Email notifications</h3>
+              <p class="desc">Choose which updates land in your inbox</p>
+              <div class="toggle-row"><div class="t-info"><h4>New KYC submissions</h4><p>Email me when a user submits for review</p></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="toggle-row"><div class="t-info"><h4>High-risk flags</h4><p>Alert on submissions flagged as high risk</p></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="toggle-row"><div class="t-info"><h4>Weekly digest</h4><p>Summary of activity every Monday</p></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="toggle-row"><div class="t-info"><h4>System announcements</h4><p>Product updates and maintenance</p></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+            </div>
+            <div class="set-card">
+              <h3>In-app notifications</h3>
+              <p class="desc">Alerts that appear inside the portal</p>
+              <div class="toggle-row"><div class="t-info"><h4>Desktop push</h4><p>Browser push notifications</p></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="toggle-row"><div class="t-info"><h4>Sound on new submission</h4><p>Play a ping for incoming reviews</p></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+            </div>
+          </div>
+
+          <!-- TEAM -->
+          <div class="set-tab" id="set-team" style="display:none">
+            <div class="set-card">
+              <h3>Team members</h3>
+              <p class="desc">Invite teammates and manage their roles</p>
+              <div class="toggle-row"><div class="t-info" style="display:flex;align-items:center;gap:10px"><div class="user-av">MD</div><div><h4 style="margin-bottom:2px">Moderator Das</h4><p>admin@mystied.app</p></div></div><span class="tag blue">Admin</span></div>
+              <div class="toggle-row"><div class="t-info" style="display:flex;align-items:center;gap:10px"><div class="user-av" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">RK</div><div><h4 style="margin-bottom:2px">Rahul Kumar</h4><p>rahul@mystied.app</p></div></div><span class="tag muted">Reviewer</span></div>
+              <div class="toggle-row"><div class="t-info" style="display:flex;align-items:center;gap:10px"><div class="user-av" style="background:linear-gradient(135deg,#10b981,#06b6d4)">SP</div><div><h4 style="margin-bottom:2px">Sneha Patel</h4><p>sneha@mystied.app</p></div></div><span class="tag muted">Reviewer</span></div>
+              <div class="set-actions"><button class="btn-primary" onclick="showToast('Invite sent','info')">+ Invite member</button></div>
+            </div>
+            <div class="set-card">
+              <h3>Danger zone</h3>
+              <p class="desc">Irreversible account actions</p>
+              <div class="toggle-row"><div class="t-info"><h4 style="color:var(--red)">Delete workspace</h4><p>Permanently remove all data. This cannot be undone.</p></div><button class="btn-red">Delete workspace</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- MODAL (user detail) -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="big-av" id="m-av" style="width:44px;height:44px;font-size:15px">AK</div>
+      <div class="modal-title">
+        <h2 id="m-name">—</h2>
+        <p id="m-sub">—</p>
+      </div>
+      <button class="modal-close" onclick="closeModalBtn()">
+        <svg viewBox="0 0 12 12" fill="none" width="12" height="12"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="info-grid2">
+        <div class="info-pair"><div class="k">Email</div><div class="v" id="m-email">—</div></div>
+        <div class="info-pair"><div class="k">Phone</div><div class="v" id="m-phone">+91 98765 00000</div></div>
+        <div class="info-pair"><div class="k">Document</div><div class="v" id="m-doc">—</div></div>
+        <div class="info-pair"><div class="k">Date</div><div class="v" id="m-date">—</div></div>
+        <div class="info-pair"><div class="k">Status</div><div class="v" id="m-status">—</div></div>
+        <div class="info-pair"><div class="k">Risk</div><div class="v" id="m-risk">—</div></div>
+      </div>
+      <div class="reject-reason" id="m-reason-box" style="display:none">
+        <h4>Rejection reason</h4>
+        <p id="m-reason">—</p>
+      </div>
+      <div class="set-actions" id="m-actions" style="margin-top:18px">
+        <!-- buttons filled by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA
+const approvedUsers=[
+  {id:'KYC-101',name:'Priya Sharma',handle:'@priya_s',email:'priya.s@email.com',doc:'Aadhaar',date:'12 Apr 2026',risk:'Low',trust:96},
+  {id:'KYC-102',name:'Sunita Rao',handle:'@sunita_r',email:'sunita.r@email.com',doc:'Passport',date:'11 Apr 2026',risk:'Low',trust:92},
+  {id:'KYC-103',name:'Meera Pillai',handle:'@meera_p',email:'meera.p@email.com',doc:'Passport',date:'10 Apr 2026',risk:'Low',trust:94},
+  {id:'KYC-104',name:'Vikram Das',handle:'@vikram_d',email:'vikram.d@email.com',doc:'Driving Licence',date:'09 Apr 2026',risk:'Medium',trust:81},
+  {id:'KYC-105',name:'Ananya Gupta',handle:'@ananya_g',email:'ananya.g@email.com',doc:'Aadhaar',date:'08 Apr 2026',risk:'Low',trust:89},
+  {id:'KYC-106',name:'Rohit Malhotra',handle:'@rohit_m',email:'rohit.m@email.com',doc:'Aadhaar',date:'07 Apr 2026',risk:'Low',trust:93},
+  {id:'KYC-107',name:'Kavya Menon',handle:'@kavya_m',email:'kavya.m@email.com',doc:'Passport',date:'06 Apr 2026',risk:'Low',trust:97},
+  {id:'KYC-108',name:'Sameer Khan',handle:'@sameer_k',email:'sameer.k@email.com',doc:'Aadhaar',date:'05 Apr 2026',risk:'Medium',trust:78},
+];
+const rejectedUsers=[
+  {id:'KYC-201',name:'Karan Bose',handle:'@karan_b',email:'karan.b@email.com',doc:'Aadhaar',date:'13 Apr 2026',reason:'Face mismatch',reasonKey:'mismatch',attempts:2,phone:'+91 98100 22334'},
+  {id:'KYC-202',name:'Nikhil Patel',handle:'@nikhil_p',email:'nikhil.p@email.com',doc:'Aadhaar',date:'12 Apr 2026',reason:'Document blurred / unreadable',reasonKey:'blurred',attempts:3,phone:'+91 98200 11223'},
+  {id:'KYC-203',name:'Deepa Iyer',handle:'@deepa_i',email:'deepa.i@email.com',doc:'Passport',date:'11 Apr 2026',reason:'Document expired',reasonKey:'expired',attempts:1,phone:'+91 98300 55667'},
+  {id:'KYC-204',name:'Ravi Shetty',handle:'@ravi_s',email:'ravi.s@email.com',doc:'Aadhaar',date:'10 Apr 2026',reason:'Suspected fraud — blocked',reasonKey:'fraud',attempts:1,phone:'+91 98400 99112'},
+  {id:'KYC-205',name:'Farah Sheikh',handle:'@farah_s',email:'farah.s@email.com',doc:'Driving Licence',date:'09 Apr 2026',reason:'Document blurred / unreadable',reasonKey:'blurred',attempts:2,phone:'+91 98500 33445'},
+  {id:'KYC-206',name:'Tarun Mehta',handle:'@tarun_m',email:'tarun.m@email.com',doc:'Aadhaar',date:'08 Apr 2026',reason:'Face mismatch',reasonKey:'mismatch',attempts:2,phone:'+91 98600 77889'},
+];
+const activity=[
+  {who:'Priya Sharma',action:'approved',id:'KYC-101',time:'2 min ago',status:'app'},
+  {who:'Karan Bose',action:'rejected',id:'KYC-201',time:'14 min ago',status:'rej'},
+  {who:'Arjun Kapoor',action:'submitted',id:'KYC-118',time:'28 min ago',status:'pen'},
+  {who:'Meera Pillai',action:'approved',id:'KYC-103',time:'1 h ago',status:'app'},
+  {who:'Nikhil Patel',action:'rejected',id:'KYC-202',time:'2 h ago',status:'rej'},
+  {who:'Kavya Menon',action:'approved',id:'KYC-107',time:'4 h ago',status:'app'},
+];
+
+let approvedFilter='all', rejectedFilter='all', search='';
+let currentUser=null, currentType=null;
+
+function initials(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}
+function avatarGrad(n){const c=['#7c3aed,#06b6d4','#f59e0b,#ef4444','#10b981,#06b6d4','#3b82f6,#7c3aed','#ef4444,#f59e0b'];const i=n.charCodeAt(0)%c.length;return`linear-gradient(135deg,${c[i]})`}
+
+// ── NAV
+function goTo(page,el){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  ['dashboard','approved','rejected','settings'].forEach(p=>{
+    document.getElementById('page-'+p).style.display=p===page?'block':'none';
+  });
+  const titles={dashboard:['Dashboard','Overview of KYC activity'],approved:['Approved Users','Users who passed verification'],rejected:['Rejected Users','Users who failed verification'],settings:['Settings','Manage your workspace']};
+  document.getElementById('pageTitle').textContent=titles[page][0];
+  document.getElementById('pageSub').textContent=titles[page][1];
+  document.getElementById('searchWrap').style.display=page==='settings'?'none':'flex';
+  const icons={
+    dashboard:'<svg viewBox="0 0 16 16" fill="none" width="16" height="16"><rect x="1" y="1" width="6" height="6" rx="1.2" stroke="#8b5cf6" stroke-width="1.3"/><rect x="9" y="1" width="6" height="6" rx="1.2" stroke="#8b5cf6" stroke-width="1.3"/><rect x="1" y="9" width="6" height="6" rx="1.2" stroke="#8b5cf6" stroke-width="1.3"/><rect x="9" y="9" width="6" height="6" rx="1.2" stroke="#8b5cf6" stroke-width="1.3"/></svg>',
+    approved:'<svg viewBox="0 0 16 16" fill="none" width="16" height="16"><circle cx="8" cy="5" r="3" stroke="#8b5cf6" stroke-width="1.3"/><path d="M2.5 14c0-3 2.5-4.5 5.5-4.5s5.5 1.5 5.5 4.5" stroke="#8b5cf6" stroke-width="1.3" stroke-linecap="round"/><path d="M11 5.5l1 1 2-2" stroke="#8b5cf6" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    rejected:'<svg viewBox="0 0 16 16" fill="none" width="16" height="16"><circle cx="8" cy="5" r="3" stroke="#8b5cf6" stroke-width="1.3"/><path d="M2.5 14c0-3 2.5-4.5 5.5-4.5s5.5 1.5 5.5 4.5" stroke="#8b5cf6" stroke-width="1.3" stroke-linecap="round"/><path d="M11 4.5l3 3M14 4.5l-3 3" stroke="#8b5cf6" stroke-width="1.3" stroke-linecap="round"/></svg>',
+    settings:'<svg viewBox="0 0 16 16" fill="none" width="16" height="16"><circle cx="8" cy="8" r="2" stroke="#8b5cf6" stroke-width="1.3"/><path d="M13.5 9.8l1.3.7-1.3 2.2-1.4-.4a5.6 5.6 0 0 1-1.4.8L10.3 14.5H7.7l-.4-1.4a5.6 5.6 0 0 1-1.4-.8l-1.4.4-1.3-2.2 1.3-.7a5.6 5.6 0 0 1 0-1.6l-1.3-.7 1.3-2.2 1.4.4a5.6 5.6 0 0 1 1.4-.8L7.7 1.5h2.6l.4 1.4a5.6 5.6 0 0 1 1.4.8l1.4-.4 1.3 2.2-1.3.7a5.6 5.6 0 0 1 0 1.6z" stroke="#8b5cf6" stroke-width="1.3" stroke-linejoin="round"/></svg>'
+  };
+  document.getElementById('topIcon').innerHTML=icons[page];
+}
+
+// ── TABLES
+function riskTag(r){return`<span class="tag ${r==='Low'?'green':r==='Medium'?'orange':'red'}">${r}</span>`}
+function reasonTag(key,label){const map={blurred:'orange',mismatch:'red',fraud:'red',expired:'muted'};return`<span class="tag ${map[key]||'muted'}">${label}</span>`}
+
+function renderApproved(){
+  const q=search.toLowerCase();
+  let rows=approvedUsers.filter(r=>r.name.toLowerCase().includes(q)||r.id.toLowerCase().includes(q)||r.email.toLowerCase().includes(q));
+  if(approvedFilter==='week')rows=rows.slice(0,4);
+  else if(approvedFilter==='month')rows=rows.slice(0,6);
+  else if(approvedFilter==='low')rows=rows.filter(r=>r.risk==='Low');
+  document.getElementById('approved-count').textContent=`${rows.length} of ${approvedUsers.length} users`;
+  document.getElementById('st-app-total').textContent=approvedUsers.length;
+  document.getElementById('st-approved').textContent=approvedUsers.length;
+  document.getElementById('badge-approved').textContent=approvedUsers.length;
+  document.getElementById('approvedBody').innerHTML=rows.map(r=>`
+    <tr onclick="openModal('${r.id}','approved')">
+      <td>${r.id}</td>
+      <td><div class="user-cell"><div class="user-av" style="background:${avatarGrad(r.name)}">${initials(r.name)}</div><div><div class="user-name">${r.name}</div><div class="user-handle">${r.handle}</div></div></div></td>
+      <td style="color:var(--text-secondary);font-size:12px">${r.email}</td>
+      <td style="color:var(--text-secondary);font-size:12px">${r.doc}</td>
+      <td class="date-cell">${r.date}</td>
+      <td>${riskTag(r.risk)}</td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div style="width:40px;height:5px;background:var(--bg-hover);border-radius:3px;overflow:hidden"><div style="width:${r.trust}%;height:100%;background:var(--green)"></div></div><span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">${r.trust}</span></div></td>
+      <td><div class="action-btns">
+        <button class="btn-view" onclick="event.stopPropagation();openModal('${r.id}','approved')">View</button>
+        <button class="btn-red" onclick="event.stopPropagation();revokeApproved('${r.id}')">Revoke</button>
+      </div></td>
+    </tr>`).join('');
+}
+function renderRejected(){
+  const q=search.toLowerCase();
+  let rows=rejectedUsers.filter(r=>r.name.toLowerCase().includes(q)||r.id.toLowerCase().includes(q)||r.email.toLowerCase().includes(q));
+  if(rejectedFilter!=='all')rows=rows.filter(r=>r.reasonKey===rejectedFilter);
+  document.getElementById('rejected-count').textContent=`${rows.length} of ${rejectedUsers.length} users`;
+  document.getElementById('st-rej-total').textContent=rejectedUsers.length;
+  document.getElementById('st-rejected').textContent=rejectedUsers.length;
+  document.getElementById('badge-rejected').textContent=rejectedUsers.length;
+  document.getElementById('rejectedBody').innerHTML=rows.map(r=>`
+    <tr onclick="openModal('${r.id}','rejected')">
+      <td>${r.id}</td>
+      <td><div class="user-cell"><div class="user-av" style="background:${avatarGrad(r.name)}">${initials(r.name)}</div><div><div class="user-name">${r.name}</div><div class="user-handle">${r.handle}</div></div></div></td>
+      <td style="color:var(--text-secondary);font-size:12px">${r.email}</td>
+      <td class="date-cell">${r.date}</td>
+      <td>${reasonTag(r.reasonKey,r.reason)}</td>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--text-secondary)">${r.attempts}</td>
+      <td><div class="action-btns">
+        <button class="btn-view" onclick="event.stopPropagation();openModal('${r.id}','rejected')">View</button>
+        <button class="btn-green" onclick="event.stopPropagation();reinstateRejected('${r.id}')">Re-review</button>
+      </div></td>
+    </tr>`).join('');
+}
+function renderActivity(){
+  document.getElementById('activityList').innerHTML=activity.map(a=>`
+    <div class="act-item">
+      <div class="act-av" style="background:${avatarGrad(a.who)}">${initials(a.who)}</div>
+      <div class="act-text"><b>${a.who}</b> was <em>${a.action}</em> · <span style="color:var(--text-muted);font-family:var(--mono);font-size:11px">${a.id}</span></div>
+      <span class="act-status ${a.status}">${a.status==='app'?'Approved':a.status==='rej'?'Rejected':'Pending'}</span>
+      <span class="act-time">${a.time}</span>
+    </div>`).join('');
+}
+function setApprovedFilter(f,el){approvedFilter=f;document.querySelectorAll('#page-approved .filter-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');renderApproved()}
+function setRejectedFilter(f,el){rejectedFilter=f;document.querySelectorAll('#page-rejected .filter-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');renderRejected()}
+function filterTables(){search=document.getElementById('searchInput').value;renderApproved();renderRejected()}
+
+// ── MODAL
+function openModal(id,type){
+  const arr=type==='approved'?approvedUsers:rejectedUsers;
+  const u=arr.find(x=>x.id===id);if(!u)return;
+  currentUser=u;currentType=type;
+  document.getElementById('m-av').textContent=initials(u.name);
+  document.getElementById('m-av').style.background=avatarGrad(u.name);
+  document.getElementById('m-name').textContent=u.name;
+  document.getElementById('m-sub').textContent=`${u.id} · ${u.handle}`;
+  document.getElementById('m-email').textContent=u.email;
+  document.getElementById('m-phone').textContent=u.phone||'+91 98765 00000';
+  document.getElementById('m-doc').textContent=u.doc;
+  document.getElementById('m-date').textContent=u.date;
+  if(type==='approved'){
+    document.getElementById('m-status').innerHTML='<span class="tag green">Approved</span>';
+    document.getElementById('m-risk').innerHTML=riskTag(u.risk);
+    document.getElementById('m-reason-box').style.display='none';
+    document.getElementById('m-actions').innerHTML=`
+      <button class="btn-ghost" onclick="closeModalBtn()">Close</button>
+      <button class="btn-red" onclick="revokeApproved('${u.id}')">Revoke approval</button>`;
+  }else{
+    document.getElementById('m-status').innerHTML='<span class="tag red">Rejected</span>';
+    document.getElementById('m-risk').innerHTML=`<span style="color:var(--text-primary)">${u.attempts} attempt${u.attempts>1?'s':''}</span>`;
+    document.getElementById('m-reason-box').style.display='block';
+    document.getElementById('m-reason').textContent=u.reason;
+    document.getElementById('m-actions').innerHTML=`
+      <button class="btn-ghost" onclick="closeModalBtn()">Close</button>
+      <button class="btn-green" onclick="reinstateRejected('${u.id}')">Send back to review</button>`;
+  }
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(e){if(e.target===document.getElementById('modalOverlay'))closeModalBtn()}
+function closeModalBtn(){document.getElementById('modalOverlay').classList.remove('open')}
+
+function revokeApproved(id){
+  const i=approvedUsers.findIndex(u=>u.id===id);if(i<0)return;
+  const u=approvedUsers.splice(i,1)[0];
+  rejectedUsers.unshift({...u,date:'16 Apr 2026',reason:'Approval revoked by admin',reasonKey:'fraud',attempts:1,phone:'+91 98765 00000'});
+  renderApproved();renderRejected();closeModalBtn();
+  showToast(`${u.name} approval revoked`,'reject');
+}
+function reinstateRejected(id){
+  const i=rejectedUsers.findIndex(u=>u.id===id);if(i<0)return;
+  const u=rejectedUsers.splice(i,1)[0];
+  approvedUsers.unshift({id:u.id,name:u.name,handle:u.handle,email:u.email,doc:u.doc,date:'16 Apr 2026',risk:'Medium',trust:75});
+  renderApproved();renderRejected();closeModalBtn();
+  showToast(`${u.name} sent back for review`,'approve');
+}
+
+// ── SETTINGS
+function switchSetTab(tab,el){
+  document.querySelectorAll('.set-nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  ['profile','security','kyc','notif','team'].forEach(t=>{
+    document.getElementById('set-'+t).style.display=t===tab?'block':'none';
+  });
+}
+function saveSettings(){showToast('Settings saved','approve')}
+
+// ── EXPORT
+function exportCSV(type){
+  const arr=type==='approved'?approvedUsers:rejectedUsers;
+  const headers=type==='approved'?['ID','Name','Email','Document','Approved On','Risk','Trust']:['ID','Name','Email','Document','Rejected On','Reason','Attempts'];
+  const rows=arr.map(r=>type==='approved'?[r.id,r.name,r.email,r.doc,r.date,r.risk,r.trust]:[r.id,r.name,r.email,r.doc,r.date,r.reason,r.attempts]);
+  const csv=[headers,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`${type}-users.csv`;a.click();URL.revokeObjectURL(url);
+  showToast(`${type} users exported`,'info');
+}
+
+// ── TOAST
+function showToast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className=`toast show ${type}`;
+  setTimeout(()=>t.className='toast',2600);
+}
+
+renderApproved();renderRejected();renderActivity();
+</script>
+</body>
+</html>
